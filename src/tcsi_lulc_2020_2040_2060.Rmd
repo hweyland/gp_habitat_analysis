@@ -1,0 +1,348 @@
+---
+title: "tcsi_lulc_code_separation"
+author: "Hanna Weyland"
+date: "1/20/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(sf)
+library(here)
+library(tidyverse)
+library(janitor)
+library(stars)
+library(rgdal)
+```
+
+## Scenario 1 2020 (current)
+```{r}
+# read in raster for 2020
+tcsi_scn1_2020 <- read_stars(here("data","raw", "tcsi_lulc_scn1_2020.tif"))
+
+#vectorize 2020 raster to be able to perform the habitat quality table fix
+tcsi_scn1_2020_vector <- st_as_sf(tcsi_scn1_2020[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn1_2020_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn1_2020_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2020 <- tcsi_scn1_2020_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2020 <- lulc_select_2020 %>% 
+  mutate(last_2 = lulc_select_2020$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2020$gridcode, 1, nchar(lulc_select_2020$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2020 <- lulc_sep_2020 %>% 
+  mutate(second_last = substr(lulc_sep_2020$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_select_2020$gridcode %% 10) %>%
+  mutate(forest_type = first_two) %>%
+  mutate(seral_stage = second_last) %>%
+  mutate(canopy_cover = first_last) %>%
+  mutate(ecoregion_type = as.numeric(forest_type), forest_type, seral_stage, canpoy_cover) #ecoregion type will be the reclassified column of forest types
+
+
+lulc_sep_2020_numb <- lulc_sep_2020 
+
+#write it out into shape file!
+st_write(lulc_sep_2020, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn1_2020.shp")
+```
+
+
+#Scenario 1 2040 (future max)
+```{r}
+
+# read in raster for 2040
+tcsi_scn1_2040_max <-  read_stars(here("data", "tcsi_lulc_2040", "tcsi_lulc_scn1_2040_max.tif"))
+
+#vectorize 2040_max raster to be able to perform the habitat quality table fix
+tcsi_scn1_2040_max_vector <- st_as_sf(tcsi_scn1_2040_max[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn1_2040_max_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn1_2040_max_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2040_max <- tcsi_scn1_2040_max_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2040_max <- lulc_select_2040_max %>% 
+  mutate(last_2 = lulc_select_2040_max$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2040_max$gridcode, 1, nchar(lulc_select_2040_max$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2040_max <- lulc_sep_2040_max %>% 
+  mutate(second_last = substr(lulc_sep_2040_max$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_select_2040_max$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2040_max, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn1_2040_max.shp")
+```
+
+#Scenario 1 2040 (future min)
+```{r}
+# read in raster for 2060
+tcsi_scn1_2040_min <-  read_stars(here("data", "tcsi_lulc_2040", "tcsi_lulc_scn1_2040_min.tif"))
+
+#vectorize 2040_max raster to be able to perform the habitat quality table fix
+tcsi_scn1_2040_min_vector <- st_as_sf(tcsi_scn1_2040_min[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn1_2040_min_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn1_2040_min_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2040_min <- tcsi_scn1_2040_min_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2040_min <- lulc_select_2040_min %>% 
+  mutate(last_2 = lulc_select_2040_min$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2040_min$gridcode, 1, nchar(lulc_select_2040_min$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2040_min <- lulc_sep_2040_min %>% 
+  mutate(second_last = substr(lulc_sep_2040_min$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_sep_2040_min$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest type
+
+
+#write it out into shape file!
+st_write(lulc_sep_2040_min, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn1_2040_min.shp")
+```
+
+
+#Scenario 1 2060 (future max)
+```{r}
+
+# read in raster for 2060
+tcsi_scn1_2060_max <-  read_stars(here("data", "tcsi_lulc_2060", "tcsi_lulc_scn1_2060_max.tif"))
+
+#vectorize 2060_max raster to be able to perform the habitat quality table fix
+tcsi_scn1_2060_max_vector <- st_as_sf(tcsi_scn1_2060_max[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn1_2060_max_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn1_2060_max_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2060_max <- tcsi_scn1_2060_max_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2060_max <- lulc_select_2060_max %>% 
+  mutate(last_2 = lulc_select_2060_max$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2060_max$gridcode, 1, nchar(lulc_select_2060_max$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2060_max <- lulc_sep_2060_max %>% 
+  mutate(second_last = substr(lulc_sep_2060_max$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_select_2060_max$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2060_max, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn1_2060_max.shp")
+```
+
+
+#Scenario 1 2060 (future min) 
+```{r}
+
+# read in raster for 2060
+tcsi_scn1_2060_min <-  read_stars(here("data", "tcsi_lulc_2060", "tcsi_lulc_scn1_2060_min.tif"))
+
+#vectorize 2060_max raster to be able to perform the habitat quality table fix
+tcsi_scn1_2060_min_vector <- st_as_sf(tcsi_scn1_2060_min[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn1_2060_min_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn1_2060_min_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2060_min <- tcsi_scn1_2060_min_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2060_min <- lulc_select_2060_min %>% 
+  mutate(last_2 = lulc_select_2060_min$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2060_min$gridcode, 1, nchar(lulc_select_2060_min$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2060_min <- lulc_sep_2060_min %>% 
+  mutate(second_last = substr(lulc_sep_2060_min$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_sep_2060_min$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2060_min, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn1_2060_min.shp")
+```
+
+
+#Scenario 6 2040 (future max)
+```{r}
+
+# read in raster for 2040
+tcsi_scn6_2040_max <-  read_stars(here("data", "tcsi_lulc_2040", "tcsi_lulc_scn6_2040_max.tif"))
+
+#vectorize 2040_max raster to be able to perform the habitat quality table fix
+tcsi_scn6_2040_max_vector <- st_as_sf(tcsi_scn6_2040_max[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn6_2040_max_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn6_2040_max_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2040_max <- tcsi_scn6_2040_max_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2040_max <- lulc_select_2040_max %>% 
+  mutate(last_2 = lulc_select_2040_max$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2040_max$gridcode, 1, nchar(lulc_select_2040_max$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2040_max <- lulc_sep_2040_max %>% 
+  mutate(second_last = substr(lulc_sep_2040_max$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_select_2040_max$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2040_max, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn6_2040_max.shp")
+```
+
+#Scenario 6 2040 (future min)
+```{r}
+# read in raster for 2060
+tcsi_scn6_2040_min <-  read_stars(here("data", "tcsi_lulc_2040", "tcsi_lulc_scn6_2040_min.tif"))
+
+#vectorize 2040_min raster to be able to perform the habitat quality table fix
+tcsi_scn6_2040_min_vector <- st_as_sf(tcsi_scn6_2040_min[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn6_2040_min_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn6_2040_min_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2040_min <- tcsi_scn6_2040_min_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2040_min <- lulc_select_2040_min %>% 
+  mutate(last_2 = lulc_select_2040_min$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2040_min$gridcode, 1, nchar(lulc_select_2040_min$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2040_min <- lulc_sep_2040_min %>% 
+  mutate(second_last = substr(lulc_sep_2040_min$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_sep_2040_min$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2040_min, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn6_2040_min.shp")
+```
+
+
+#Scenario 6 2060 (future max)
+```{r}
+
+# read in raster for 2060
+tcsi_scn6_2060_max <-  read_stars(here("data", "tcsi_lulc_2060", "tcsi_lulc_scn6_2060_max.tif"))
+
+#vectorize 2060_max raster to be able to perform the habitat quality table fix
+tcsi_scn6_2060_max_vector <- st_as_sf(tcsi_scn6_2060_max[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn6_2060_max_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn6_2060_max_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2060_max <- tcsi_scn6_2060_max_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2060_max <- lulc_select_2060_max %>% 
+  mutate(last_2 = lulc_select_2060_max$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2060_max$gridcode, 1, nchar(lulc_select_2060_max$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2060_max <- lulc_sep_2060_max %>% 
+  mutate(second_last = substr(lulc_sep_2060_max$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_select_2060_max$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2060_max, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn6_2060_max.shp")
+```
+
+
+#Scenario 6 2060 (future min)
+```{r}
+
+# read in raster for 2060
+tcsi_scn6_2060_min <-  read_stars(here("data", "tcsi_lulc_2060", "tcsi_lulc_scn6_2060_min.tif"))
+
+#vectorize 2060_max raster to be able to perform the habitat quality table fix
+tcsi_scn6_2060_min_vector <- st_as_sf(tcsi_scn6_2060_min[1], merge = FALSE, as_points = F)
+
+#set crs to NAD83 UTM zone 10
+st_crs(tcsi_scn6_2060_min_vector) <- 3310
+
+#set column names to grid code and geometry
+colnames(tcsi_scn6_2060_min_vector) <- c("gridcode", "geometry")
+
+#put scenario vector into lulc_select to be able to break apart lulc code 
+lulc_select_2060_min <- tcsi_scn6_2060_min_vector
+
+#let's break apart landuse stuff 
+lulc_sep_2060_min <- lulc_select_2060_min %>% 
+  mutate(last_2 = lulc_select_2060_min$gridcode %% 100) %>%
+  mutate(first_two = substr(lulc_select_2060_min$gridcode, 1, nchar(lulc_select_2060_min$gridcode)-2 )) 
+
+#separate the number in the gridcode to create new columns
+lulc_sep_2060_min <- lulc_sep_2060_min %>% 
+  mutate(second_last = substr(lulc_sep_2060_min$last_2, 1, 1) ) %>% 
+  mutate(first_last = lulc_sep_2060_min$gridcode %% 10) %>% 
+  mutate(forest_type = first_two) %>% 
+  mutate(seral_stage = second_last) %>% 
+  mutate(canopy_cover = first_last) %>% 
+  mutate(ecoregion_type = as.numeric(forest_type)) #ecoregion type will be the reclassified column of forest types
+
+#write it out into shape file!
+st_write(lulc_sep_2060_min, "/Users/hannaweyland/Desktop/UCSB/Bren/GP/gp_habitat_quality/output\\tcsi_lulc_scn6_2060_min.shp")
+```

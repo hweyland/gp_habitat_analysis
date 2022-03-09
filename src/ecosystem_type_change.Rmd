@@ -1,0 +1,196 @@
+---
+title: "Ecosystem Type Change"
+author: "Hanna Weyland"
+date: "2/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(janitor)
+library(tidyverse)
+library(here)
+```
+
+```{r}
+# read in data 
+
+#scenario 1 2040
+tcsi_scn1_2040_min <- read_csv(here("data", "tables", "tcsi_scn1_2040_min.csv")) %>% 
+  clean_names() %>% 
+  rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn11")
+
+tcsi_scn1_2040_max <- read_csv(here("data", "tables", "tcsi_scn1_2040_max.csv")) %>% 
+  clean_names() %>%
+   rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn11")
+
+#scenario 1 2060
+tcsi_scn1_2060_min <- read_csv(here("data","tables", "tcsi_scn1_2060_min.csv")) %>% 
+  clean_names() %>%
+   rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn11")
+
+tcsi_scn1_2060_max <- read_csv(here("data","tables", "tcsi_scn1_2060_max.csv")) %>% 
+  clean_names() %>% 
+  rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn11")
+
+#scenario 6 2040
+tcsi_scn6_2040_min <- read_csv(here("data","tables", "tcsi_scn6_2040_min.csv")) %>% 
+  clean_names() %>% 
+   rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn6")
+
+tcsi_scn6_2040_max <- read_csv(here("data","tables", "tcsi_scn6_2040_max.csv")) %>% 
+  clean_names() %>% 
+   rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn6")
+
+#scenario 6 2060
+tcsi_scn6_2060_min <- read_csv(here("data","tables", "tcsi_scn6_2060_min.csv")) %>% 
+  clean_names() %>% 
+  rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn6")
+
+tcsi_scn6_2060_max <- read_csv(here("data","tables", "tcsi_scn6_2060_max.csv")) %>% 
+  clean_names() %>% 
+  rename("forest_type_2020" = "tcsi_scn1", "forest_type_2040" = "tcsi_scn6")
+```
+
+
+# Ecosystem Type Change (2020 -> 2040) 
+
+```{r}
+#create a function to identify ecosystem type changes
+eco_change_function_2040 <- function(raster) {
+
+#reclassify land use to create new land cover code
+#rename based on the document by TNC: Forest Type for df tsci_min_2040, forest_type_2020 
+raster$forest_type_2020[raster$forest_type_2020 == 0] <- "non-forested"
+raster$forest_type_2020[raster$forest_type_2020 == 1] <- "aspen"
+raster$forest_type_2020[raster$forest_type_2020 == 2] <- "montane_hardwood"
+raster$forest_type_2020[raster$forest_type_2020 == 3] <- "montane_riparian"
+raster$forest_type_2020[raster$forest_type_2020 == 4] <- "white_fir"
+raster$forest_type_2020[raster$forest_type_2020 == 5] <- "red_fir"
+raster$forest_type_2020[raster$forest_type_2020 == 6] <- "jeffrey_pine"
+raster$forest_type_2020[raster$forest_type_2020 == 7] <- "ponderosa_pine"
+raster$forest_type_2020[raster$forest_type_2020 == 8] <- "douglas-fir"
+raster$forest_type_2020[raster$forest_type_2020 == 9] <- "mixed_hardwood_conifer"
+raster$forest_type_2020[raster$forest_type_2020 == 10] <- "lodgepole_pine"
+raster$forest_type_2020[raster$forest_type_2020 == 11] <- "sierra_mixed_conifer"
+raster$forest_type_2020[raster$forest_type_2020 == 12] <- "sierra_high_elevation_mixed_conifer"
+raster$forest_type_2020[raster$forest_type_2020 == 13] <- "juniper"
+raster$forest_type_2020[raster$forest_type_2020 == 14] <- "chapparal"
+
+#rename based on the document by TNC: Forest Type 2060
+raster$forest_type_2040[raster$forest_type_2040 == 0] <- "non-forested"
+raster$forest_type_2040[raster$forest_type_2040 == 1] <- "aspen"
+raster$forest_type_2040[raster$forest_type_2040 == 2] <- "montane_hardwood"
+raster$forest_type_2040[raster$forest_type_2040 == 3] <- "montane_riparian"
+raster$forest_type_2040[raster$forest_type_2040 == 4] <- "white_fir"
+raster$forest_type_2040[raster$forest_type_2040 == 5] <- "red_fir"
+raster$forest_type_2040[raster$forest_type_2040 == 6] <- "jeffrey_pine"
+raster$forest_type_2040[raster$forest_type_2040 == 7] <- "ponderosa_pine"
+raster$forest_type_2040[raster$forest_type_2040 == 8] <- "douglas-fir"
+raster$forest_type_2040[raster$forest_type_2040 == 9] <- "mixed_hardwood_conifer"
+raster$forest_type_2040[raster$forest_type_2040 == 10] <- "lodgepole_pine"
+raster$forest_type_2040[raster$forest_type_2040 == 11] <- "sierra_mixed_conifer"
+raster$forest_type_2040[raster$forest_type_2040 == 12] <- "sierra_high_elevation_mixed_conifer"
+raster$forest_type_2040[raster$forest_type_2040 == 13] <- "juniper"
+raster$forest_type_2040[raster$forest_type_2040 == 14] <- "chapparal"
+
+#add new column detecting change
+raster <- raster %>% 
+  mutate(forest_type_change = ifelse(forest_type_2020 != forest_type_2040, str_c(forest_type_2020, " -> ", forest_type_2040), forest_type_2040))
+
+return(raster)
+}
+```
+
+
+# Ecosystem Type Change (2020 -> 2060) 
+
+```{r}
+#create a function to identify ecosystem type changes
+eco_change_function_2060 <- function(raster) {
+
+#reclassify land use to create new land cover code
+#rename based on the document by TNC: Forest Type for df tsci_min_2040, forest_type_2020 
+raster$forest_type_2020[raster$forest_type_2020 == 0] <- "non-forested"
+raster$forest_type_2020[raster$forest_type_2020 == 1] <- "aspen"
+raster$forest_type_2020[raster$forest_type_2020 == 2] <- "montane_hardwood"
+raster$forest_type_2020[raster$forest_type_2020 == 3] <- "montane_riparian"
+raster$forest_type_2020[raster$forest_type_2020 == 4] <- "white_fir"
+raster$forest_type_2020[raster$forest_type_2020 == 5] <- "red_fir"
+raster$forest_type_2020[raster$forest_type_2020 == 6] <- "jeffrey_pine"
+raster$forest_type_2020[raster$forest_type_2020 == 7] <- "ponderosa_pine"
+raster$forest_type_2020[raster$forest_type_2020 == 8] <- "douglas-fir"
+raster$forest_type_2020[raster$forest_type_2020 == 9] <- "mixed_hardwood_conifer"
+raster$forest_type_2020[raster$forest_type_2020 == 10] <- "lodgepole_pine"
+raster$forest_type_2020[raster$forest_type_2020 == 11] <- "sierra_mixed_conifer"
+raster$forest_type_2020[raster$forest_type_2020 == 12] <- "sierra_high_elevation_mixed_conifer"
+raster$forest_type_2020[raster$forest_type_2020 == 13] <- "juniper"
+raster$forest_type_2020[raster$forest_type_2020 == 14] <- "chapparal"
+
+#rename based on the document by TNC: Forest Type 2060
+raster$forest_type_2060[raster$forest_type_2060 == 0] <- "non-forested"
+raster$forest_type_2060[raster$forest_type_2060 == 1] <- "aspen"
+raster$forest_type_2060[raster$forest_type_2060 == 2] <- "montane_hardwood"
+raster$forest_type_2060[raster$forest_type_2060 == 3] <- "montane_riparian"
+raster$forest_type_2060[raster$forest_type_2060 == 4] <- "white_fir"
+raster$forest_type_2060[raster$forest_type_2060 == 5] <- "red_fir"
+raster$forest_type_2060[raster$forest_type_2060 == 6] <- "jeffrey_pine"
+raster$forest_type_2060[raster$forest_type_2060 == 7] <- "ponderosa_pine"
+raster$forest_type_2060[raster$forest_type_2060 == 8] <- "douglas-fir"
+raster$forest_type_2060[raster$forest_type_2060 == 9] <- "mixed_hardwood_conifer"
+raster$forest_type_2060[raster$forest_type_2060 == 10] <- "lodgepole_pine"
+raster$forest_type_2060[raster$forest_type_2060 == 11] <- "sierra_mixed_conifer"
+raster$forest_type_2060[raster$forest_type_2060 == 12] <- "sierra_high_elevation_mixed_conifer"
+raster$forest_type_2060[raster$forest_type_2060 == 13] <- "juniper"
+raster$forest_type_2060[raster$forest_type_2060 == 14] <- "chapparal"
+
+#add new column detecting change
+raster <- raster %>% 
+  mutate(forest_type_change = ifelse(forest_type_2020 != forest_type_2060, str_c(forest_type_2020, " -> ", forest_type_2060), forest_type_2060))
+
+return(raster)
+}
+```
+
+```{r}
+#run the function on each scenario 
+
+#scenario 1 2040 and 2060 
+tcsi_scn1_2040_min_change <- eco_change_function_2040(tcsi_scn1_2040_min)
+tcsi_scn1_2040_max_change <- eco_change_function_2040(tcsi_scn1_2040_max)
+tcsi_scn1_2060_min_change <- eco_change_function_2060(tcsi_scn1_2060_min)
+tcsi_scn1_2060_max_change <- eco_change_function_2060(tcsi_scn1_2060_max)
+
+#scenario 6 2040 and 2060 
+tcsi_scn6_2040_min_change <- eco_change_function_2040(tcsi_scn6_2040_min)
+tcsi_scn6_2040_max_change <- eco_change_function_2040(tcsi_scn6_2040_max)
+tcsi_scn6_2060_min_change <- eco_change_function_2060(tcsi_scn6_2060_min)
+tcsi_scn6_2060_max_change <- eco_change_function_2060(tcsi_scn6_2060_max)
+```
+
+```{r}
+#export as csv
+
+#scenario 1 2040
+write.csv(tcsi_scn1_2040_min_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn1_2040_min_change.csv", row.names = FALSE)
+
+write.csv(tcsi_scn1_2040_max_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn1_2040_max_change.csv", row.names = FALSE)
+
+
+#scenario 1 2060
+write.csv(tcsi_scn1_2060_min_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn1_2060_min_change.csv", row.names = FALSE)
+
+write.csv(tcsi_scn1_2060_max_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn1_2060_max_change.csv", row.names = FALSE)
+
+
+#scenario 6 2040
+write.csv(tcsi_scn6_2040_min_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn6_2040_min_change.csv", row.names = FALSE)
+
+write.csv(tcsi_scn6_2040_max_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn6_2040_max_change.csv", row.names = FALSE)
+
+
+#scenario 6 2060
+write.csv(tcsi_scn6_2060_min_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn6_2060_min_change.csv", row.names = FALSE)
+
+write.csv(tcsi_scn6_2060_max_change,"~/Desktop/UCSB/Bren/GP/gp_habitat_quality/\\tcsi_scn6_2060_max_change.csv", row.names = FALSE)
+```

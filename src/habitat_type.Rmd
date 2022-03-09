@@ -1,0 +1,62 @@
+---
+title: "habitat_type"
+author: "Hanna Weyland"
+date: "3/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(here)
+library(tidyverse)
+library(janitor)
+```
+
+```{r, read in data}
+#2020 data 
+tcsi_scn1_2020 <- read.csv(here("data", "tables", "tcsi_scn1_2020.csv")) %>% 
+  clean_names()
+
+#Scenario 1 data
+tcsi_scn1_2040_max_change <- read.csv(here("data", "tables", "tcsi_scn1_2040_max.csv")) %>% 
+  clean_names()
+
+tcsi_scn1_2040_min_change <- read.csv(here("data", "tables", "tcsi_scn1_2040_min.csv")) %>% 
+  clean_names()
+tcsi_scn1_2060_max_change <- read.csv(here("data", "tables", "tcsi_scn1_2060_max.csv")) %>% 
+  clean_names()
+tcsi_scn1_2060_min_change <- read.csv(here("data", "tables", "tcsi_scn1_2060_min.csv")) %>% 
+  clean_names()
+
+#Scenario 6 data
+tcsi_scn6_2040_max_change <- read.csv(here("data", "tables", "tcsi_scn6_2040_max.csv")) %>% 
+  clean_names()
+tcsi_scn6_2040_min_change <- read.csv(here("data", "tables", "tcsi_scn6_2040_min.csv")) %>% 
+  clean_names()
+tcsi_scn6_2060_max_change <- read.csv(here("data", "tables", "tcsi_scn6_2060_max.csv")) %>% 
+  clean_names()
+tcsi_scn6_2060_min_change <- read.csv(here("data", "tables", "tcsi_scn6_2060_min.csv")) %>% 
+  clean_names()
+```
+
+```{r}
+#Scenario 1 data - add forest type column 
+#reclassify land use to create new land cover code
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 0] <- "non-forested"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 1] <- "aspen"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 2] <- "montane_hardwood"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 3] <- "montane_riparian"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 4] <- "white_fir"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 5] <- "red_fir"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 6] <- "jeffrey_pine"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 7] <- "ponderosa_pine"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 8] <- "douglas-fir"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 9] <- "mixed_hardwood_conifer"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 10] <- "lodgepole_pine"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 11] <- "sierra_mixed_conifer"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 12] <- "sierra_high_elevation_mixed_conifer"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 13] <- "juniper"
+tcsi_scn1_2040_max_change$tcsi_scn11[tcsi_scn1_2040_max_change$tcsi_scn11 == 14] <- "chapparal"
+```
+
+
